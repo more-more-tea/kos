@@ -22,9 +22,10 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 include ../../config.mk
+include Makefile.sources
 
 TARGET	= libk.a
-OBJS	= int80.o syscalls.o graphic.o sound.o malloc.o
+OBJS	= $(SRC:.c=.o) $(ASM:.S=.o)
 
 CFLAGS	+= -I ../libc
 LDFLAGS	+= -L ../libc -lc
@@ -34,13 +35,22 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(AR) -rcs $@ $^
 
-%o: %c
-	$(CC) $(CFLAGS) -c $^ -o $@
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-%o: %S
-	$(CC) $(CFLAGS) -c $^ -o $@
+%.o: %.S
+	$(CC) $(CFLAGS) -c $< -o $@
 clean:
 	$(RM) $(OBJS)
+.PHONY: clean
 
 distclean: clean
-	$(RM) $(TARGET)
+	$(RM) $(TARGET) .depend
+.PHONY: distclean
+
+-include .depend
+.depend: Makefile.sources $(SRC) $(ASM)
+	$(RM) .depend
+	for f in $(SRC) $(ASM); do \
+	    $(CC) -MM $(CFLAGS) -MT $${f/.[cS]/.o} $$f >> .depend; \
+	done

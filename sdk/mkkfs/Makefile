@@ -22,9 +22,11 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 include ../../config.mk
+include Makefile.sources
 
 TARGET	  = mkkfs
-OBJS	  = mkkfs.o
+
+OBJS	= $(SRC:.c=.o)
 
 # Removes previous CFLAGS and sets new ones
 CFLAGS	= -Werror -W -Wall -std=c99
@@ -36,11 +38,20 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CC) $^ -o $@ $(LDFLAGS)
 
-%o: %c
-	$(CC) $(CFLAGS) -c $^ -o $@
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	$(RM) $(OBJS)
+.PHONY: clean
 
 distclean: clean
-	$(RM) $(TARGET)
+	$(RM) $(TARGET) .depend
+.PHONY: distclean
+
+-include .depend
+.depend: Makefile.sources $(SRC)
+	$(RM) .depend
+	for f in $(SRC); do \
+	    $(CC) -MM $(CFLAGS) -MT $${f/.[cS]/.o} $$f >> .depend; \
+	done

@@ -37,24 +37,26 @@ GAME		?= chichepong
 FLOPPY		= k_floppy
 USBSTICK	= k_usbstick
 
-.PHONY: k sdk rom
-
 all: k
 
 sdk:
 	$(MAKE) -C $(SDK_PATH)
+.PHONY: sdk
 
 k: sdk
 	$(MAKE) -C $(K_PATH)
+.PHONY: k
 
 rom: sdk
 	$(MAKE) -C $(ROMS_PATH) GAME=$(GAME)
+.PHONY: rom
 
 clean:
 	for I in $(SUBDIRS);			\
 	do					\
 		$(MAKE) -C $$I $@ || exit 1;	\
 	done
+.PHONY: clean
 
 distclean:
 	for I in $(SUBDIRS);			\
@@ -62,14 +64,21 @@ distclean:
 		$(MAKE) -C $$I $@ || exit 1;	\
 	done
 	$(RM) $(FLOPPY) $(USBSTICK)
+.PHONY: distclean
 
 boot: floppy
 	$(QEMU) -fda $(FLOPPY) -soundhw all &
+.PHONY: boot
+
+bochs: floppy
+	$(BOCHS) -q 'boot:floppy' 'floppya: 1_44=$(FLOPPY), status=inserted'
+.PHONY: bochs
 
 floppy: k rom
 	$(CP) sdk/grub/floppy $(FLOPPY)
 	$(MCOPY) -i $(FLOPPY) $(K) ::/modules/k
 	$(MCOPY) -i $(FLOPPY) $(ROM) ::/modules/rom
+.PHONY: floppy
 
 usbstick: k rom
 	$(CP) sdk/grub/usbstick $(USBSTICK)
@@ -77,3 +86,4 @@ usbstick: k rom
 	$(CP) $(K) $(MNT)/modules/k
 	$(CP) $(ROM) $(MNT)/modules/rom
 	$(UMOUNT) $(MNT)
+.PHONY: usbstick

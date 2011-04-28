@@ -29,6 +29,7 @@ MCOPY	= mcopy
 MKFS	= mkfs
 MMD	= mmd
 QEMU	= qemu
+BOCHS	= bochs
 RM	= rm -f
 
 MKDIR	= mkdir
@@ -37,7 +38,7 @@ UMOUNT	= umount
 DD	= dd
 MNT	= /mnt
 
-CFLAGS	= -W -Wall -Werror -nostdinc -fno-builtin -g3 -gdwarf-2 -m32
+CFLAGS	= -Wall -Wextra -Werror -nostdinc -fno-builtin -g3 -gdwarf-2 -m32
 # SSP causes compilation problems on Ubuntu
 CFLAGS	+= -fno-stack-protector
 LDFLAGS	= -nostdlib -m32
